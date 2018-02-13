@@ -1,1 +1,0 @@
-../dop_expsyn.mod
