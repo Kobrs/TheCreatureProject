@@ -8,7 +8,6 @@ This project aims to create environment for creating virtual creatures driven by
 * [Ascii_graph][ascii_graph_link]
 * Matplotlib
 * Numpy
-* 
 * [DEAP][deap_link] (optional)
 
 ## Installation
