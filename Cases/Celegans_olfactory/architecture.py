@@ -1,3 +1,6 @@
+import numpy as np
+
+
 n_cells = 10
 sensor_cells = [1, 2]
 # Note that tracks cells are reversed, so it works with off active stimulation
@@ -6,7 +9,8 @@ trackR_cell = 4
 gate_cells = [-1, -2]
 dend_pas = -60.
 
-def generate_architecture_all2all(n, w_min=0, w_max=0.1, d_min=0, d_max=16):
+def generate_architecture_all2all(n, w_min=0, w_max=0.1, d_min=0, d_max=16, 
+                                  hi_pas_p=0.2):
     """
     Generates all to all network architecture with random weights in given range
     """
@@ -23,25 +27,26 @@ def generate_architecture_all2all(n, w_min=0, w_max=0.1, d_min=0, d_max=16):
             d = np.random.randint(low=d_min, high=d_max)
             conns.append((i, (w_type, w), d))
 
+        pas = -60 if np.random.rand() < hi_pas_p else 2000
         architecture[cell] = {'connections': conns, 'x': x, 'dend_len':100,
-                              'dend_pas': dend_pas}
+                              'dend_pas': pas}
     return architecture
 
 
-def generate_architecture_prebuilt(n=None, w_min=0, w_max=0.1, d_min=0, d_max=16):
+def generate_architecture_prebuilt():
     d = 1
     specimen_architecture = {
         sensor_cells[0]: {'connections': [(8, (1, 0.04), d), (9, (0, 0.3), d), (sensor_cells[1], (0, 0.0), d)],
             'x': 0, 'dend_len': 100, 'dend_pas': -65, 'label': 'AWCL'},
         sensor_cells[1]: {'connections': [(10, (0, 0.3), d), (11, (1, 0.04), d), (sensor_cells[0], (0, 0.0), d)],
             'x': 0, 'dend_len': 100, 'dend_pas': -65, 'label': 'AWCR'},
-        8: {'connections': [(trackL_cell, (1, 0.01), d)],
+        8: {'connections': [(trackR_cell, (1, 0.01), d)],
             'x': 0, 'dend_len': 100, 'dend_pas': -65, 'label': 'AIBL'},
         9: {'connections': [(12, (1, 0.0005), d)],
             'x': 0, 'dend_len': 100, 'dend_pas': 2000, 'label': 'AIYL'},  # this huge pas current will lead to self spiking cell
         10: {'connections': [(12, (1, 0.0005), d)],
             'x': 0, 'dend_len': 100, 'dend_pas': 2000, 'label': 'AIYR'},
-        11: {'connections': [(trackR_cell, (1, 0.01), d)],
+        11: {'connections': [(trackL_cell, (1, 0.01), d)],
             'x': 0, 'dend_len': 100, 'dend_pas': -65, 'label': 'AIBR'},
         12: {'connections': [(trackL_cell, (1, 0.04), d), (trackR_cell, (1, 0.04), d)],
             'x': 0, 'dend_len': 100, 'dend_pas': -65, 'label': 'X'},
@@ -56,13 +61,35 @@ def generate_architecture_prebuilt(n=None, w_min=0, w_max=0.1, d_min=0, d_max=16
 
 def generate_architecture_braitenberg():
 	# Connection contains: 'target cell', indicator of conn type(i,e), weight and delay values
-	specimen_architecture = {sensor_cells[0]: {'connections': [(trackL_cell, (1, 0.015), 5)],
-		 'x': 0, 'dend_len': 100, 'dend_pas': dend_pas},
-		sensor_cells[1]: {'connections': [(trackR_cell, (1, 0.03), 5)],
-		 'x': 0, 'dend_len': 100, 'dend_pas': dend_pas},
+	specimen_architecture = {
+        sensor_cells[0]: {'connections': [(trackR_cell, (1, 0.015), 5)],
+		 'x': 0, 'dend_len': 100, 'dend_pas': 1100, 'label': 'AWCL'},
+		sensor_cells[1]: {'connections': [(trackL_cell, (1, 0.03), 5)],
+		 'x': 0, 'dend_len': 100, 'dend_pas': 1100, 'label': 'AWCR'},
 		trackL_cell: {'connections': [],
-		 'x': 0, 'dend_len': 100, 'dend_pas': dend_pas},
+		 'x': 0, 'dend_len': 100, 'dend_pas': dend_pas, 'label': 'ML'},
 		trackR_cell: {'connections': [],
-		 'x': 0, 'dend_len': 100, 'dend_pas': dend_pas}}
+		 'x': 0, 'dend_len': 100, 'dend_pas': dend_pas, 'label': 'MR'}}
 
 	return specimen_architecture
+
+
+def generate_architecture_modified_braitenberg():
+    # Connection contains: 'target cell', indicator of conn type(i,e), weight and delay values
+    d = 1
+    specimen_architecture = {
+        sensor_cells[0]: {'connections': [(5, (0, 0.3), d)],
+         'x': 0, 'dend_len': 100, 'dend_pas': -20, 'label': 'AWCL'},
+        sensor_cells[1]: {'connections': [(6, (0, 0.3), d)],
+         'x': 0, 'dend_len': 100, 'dend_pas': -20, 'label': 'AWCR'},
+        5: {'connections': [(trackR_cell, (1, 0.04), d)],
+         'x': 0, 'dend_len': 100, 'dend_pas': 2000, 'label': 'IL'},
+        6: {'connections': [(trackL_cell, (1, 0.04), d)],
+         'x': 0, 'dend_len': 100, 'dend_pas': 2000, 'label': 'IR'},
+        trackL_cell: {'connections': [],
+         'x': 0, 'dend_len': 100, 'dend_pas': dend_pas, 'label': 'ML'},
+        trackR_cell: {'connections': [],
+         'x': 0, 'dend_len': 100, 'dend_pas': dend_pas, 'label': 'MR'}}
+
+    return specimen_architecture
+

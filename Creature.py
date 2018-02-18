@@ -22,7 +22,8 @@ class Creature(object):
                  trackL_cells=[32, 33, 34, 35], trackR_cells=[64, 65, 66, 67],
                  engine_force=0.15, creature_spawn_loc=None,
                  motors_min_spikes=None, motors_max_spikes=None,
-                 smooth_track_control=False, use_sensor=True, logging=False):
+                 smooth_track_control=False, use_sensor=True, use_dopamine=False,
+                 logging=False):
         """
         Class which creates creature - object containig both simulated body
         and neuron net to drive it.
@@ -55,7 +56,9 @@ class Creature(object):
         self.motors_max_spikes = motors_max_spikes
         self.WIDTH = environment.WIDTH
         self.HEIGHT = environment.HEIGHT
+        self.use_dopamine = use_dopamine
 
+        self.cell = Cells.STDP_Dopamine_Cell
         self.num_of_regions = 3
 
         self.neuron2creature_dt = self.creature_sim_dt*1000  # basically convert s to ms
@@ -69,7 +72,7 @@ class Creature(object):
         self.body = Simulation.Body(
             environment=environment, engine_force=self.engine_force,
             sensor_h=200, sensor_a=40, creature_spawn_loc=creature_spawn_loc,
-            use_sensor=use_sensor)
+            use_sensor=use_sensor, logging=logging)
 
         self.max_score = float(self.environment.num_of_targets) / (quickest_run*(1./self.creature_sim_dt))
 
@@ -95,14 +98,16 @@ class Creature(object):
         return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
 
 
-    def _log(self, val):
+    def _log(self, *args):
         if self.logging:
-            print val
+            for arg in args:
+                print arg,
+            print ""
 
 
     def create_from_DNA(self, DNA):
         # Assuming that DNA is string of binary digits
-        self.net = ga.Specimen(DNA_str, Cells.STDP_Dopamine_Cell,
+        self.net = ga.Specimen(DNA_str, self.cell,
                                num_of_regions=self.num_of_regions,
                                logging=self.logging)
 
@@ -110,9 +115,12 @@ class Creature(object):
 
 
     def create_from_architecture(self, architecture, dop, dopdr):
+
+        print "\n\n\n\n\n\n\nCreating with cells:", self.cell
+
         self.architecture = architecture
         interpreter = lambda _: (architecture, dop, dopdr)
-        self.net = ga.Specimen("", Cells.STDP_Dopamine_Cell,
+        self.net = ga.Specimen("", self.cell,
                                interpreter=interpreter,
                                num_of_regions=self.num_of_regions,
                                logging=self.logging)
@@ -156,8 +164,9 @@ class Creature(object):
         self.net.stimulate_gate_cell(cell_id, amp, dur)
 
 
-    def add_noise_to_cells(self, cells, mean=0.01, stdev=0.3, dur=1e9, gate_cell=False):
-        self.net.add_noise_to_cells(cells, mean=mean, stdev=stdev, dur=dur, gate_cell=gate_cell)
+    def add_noise_to_cells(self, cells, mean=0.01, stdev=0.3, dur=1e9, gate_cell=False, one_step=False):
+        self.net.add_noise_to_cells(cells, mean=mean, stdev=stdev, dur=dur,
+                                    gate_cell=gate_cell, one_step=one_step)
 
 
     def get_position(self):
@@ -232,20 +241,12 @@ class Creature(object):
 
             self.net.apply_stimuli(stim_dict)
 
-            # NOTE: For now using net.run, which doesn't require this
-            # Neccessary to append stimuli to NEURON simulation
-            # self.net.sim_init()
-
 
         # Check if picked up something
-        if self.body.picked_up:
+        if self.body.picked_up and self.use_dopamine:
             self._log("Picked up something and this makes me happy!")
             for i in xrange(self.num_of_regions-1 ): # 0 indexing
                 self.net.release_dopamine(region=i)
-
-            # NOTE: For now using net.run, which doesn't require this
-            # Append changes to NEURON simulation
-            # self.net.sim_init()
 
 
         # Get some feedback from our creature

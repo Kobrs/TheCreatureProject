@@ -21,21 +21,26 @@ sim_time = 500 #  [ms]
 motor_max_spikes = 6
 engine_force = 0.15
 engine_time_window = 50
-noise_mean = 0.01
-noise_stdev = 0.1
-plotting_activity = True
+noise_mean = 0.1
+noise_stdev = 1.
+plotting_activity = False
 
 n_cells = architecture.n_cells
 sensor_cells = architecture.sensor_cells
 trackL_cell = architecture.trackL_cell
 trackR_cell = architecture.trackR_cell
 gate_cells = architecture.gate_cells
+motor_cells = [trackL_cell, trackR_cell]
 
 specimen_architecture = architecture.generate_architecture_prebuilt()
+# specimen_architecture = architecture.generate_architecture_modified_braitenberg()
+# specimen_architecture = architecture.generate_architecture_braitenberg()
 
 
 # Allow mapping plot order
 information_flow = [1, 2, 8, 9, 10, 11, 12, 3, 4]
+# information_flow = [1, 2, 5, 6, 3, 4]
+# information_flow = [1, 2, 3 ,4]
 offset_dict = dict([(v, i) for (i, v) in enumerate(reversed(information_flow))])
 
 
@@ -72,7 +77,7 @@ def raster_plot(spikes):
 def force_plot(spikes):
 	# Now plot motor force
 	forces = []
-	for cell in sensor_cells:
+	for cell in motor_cells:
 		forces.append([])
 		spike_train = spikes[cell]
 		for i in xrange(sim_time / engine_time_window):
@@ -90,6 +95,7 @@ def force_plot(spikes):
 	Rforce = np.array(forces[1]+[forces[1][-1]])
 	plt.plot(x, Lforce, label='Left track force')
 	plt.plot(x, Rforce, label='Right track force')
+	plt.ylim(ymin=0)
 	plt.legend(loc='upper right')
 
 

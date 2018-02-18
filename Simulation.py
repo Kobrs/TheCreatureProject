@@ -15,7 +15,7 @@ import Creature
 class Environment(object):
     def __init__(self, num_of_targets, num_lsources, WIDTH, HEIGHT,
                  clock_time, display_sim, creature_sim_dt=1./20,
-                 teleporting_walls=False, iterations=1000):
+                 teleporting_walls=False, iterations=1000, logging=False):
         """
         This class takes care of environment physics simulation. It will create
         space on which other creature bodies can be spawned.
@@ -33,11 +33,13 @@ class Environment(object):
         self.display_sim = display_sim
         self.clock_time = clock_time
         self.creature_sim_dt = creature_sim_dt
-        self.teleporting_walls = teleporting_walls 
+        self.teleporting_walls = teleporting_walls
+        self._logging = logging
 
         self.creatures = []  # this array will hold all existing creatures
         self.light_sources = []
         self.TARGET_COLLTYPE = 2
+        self.frozen = False
 
         # Needed only for displaying simulation
         if self.display_sim:
@@ -55,6 +57,13 @@ class Environment(object):
 
         self.spawn_targets([self.WIDTH, self.HEIGHT], num_of_targets, 10)
         self.spawn_targets([self.WIDTH, self.HEIGHT], num_lsources, 15, light_source=True)
+
+
+    def _log(self, *args):
+        if self._logging:
+            for arg in args:
+                print arg,
+            print ""
 
 
     def _spawn_target(self, x, y, radius=10, light_source=False):
@@ -114,11 +123,7 @@ class Environment(object):
                                 num_targets=n, light_source=True)
 
 
-    def spawn_creature(
-                 self, environment, creature_lifetime=0, sensor_cells=[1, 2, 3, 4, 5],
-                 trackL_cells=[32, 33, 34, 35], trackR_cells=[64, 65, 66, 67],
-                 engine_force=0.15, creature_spawn_loc=None, motors_min_spikes=None, motors_max_spikes=None,
-                 smooth_track_control=False, use_sensor=True, logging=False):
+    def spawn_creature(self, *args, **kwargs):
         """
         Method to spawn new creature in current environment.
         :param creature_lifetime: time after which creature dies (used for GA)
@@ -134,10 +139,7 @@ class Environment(object):
                                      on number of motory cells
         :param logging: decides whether to log creature's activity from within this classs
         """
-        creature = Creature.Creature(environment, creature_lifetime, sensor_cells, trackL_cells,
-                          trackR_cells, engine_force, creature_spawn_loc, motors_min_spikes,
-                          motors_max_spikes, smooth_track_control,
-                          use_sensor, logging)
+        creature = Creature.Creature(*args, **kwargs)
         self.creatures.append(creature)
 
 
@@ -178,7 +180,7 @@ class Environment(object):
         for creature in self.creatures:
             body = creature.body
             if not (body.trackL_running or body.trackR_running) and not body.stepping:
-                print "resetting velocity!"
+                self._log("resetting velocity!")
                 body.creature.velocity = (0, 0)
                 body.creature.angular_velocity = 0
 
@@ -197,7 +199,7 @@ class Environment(object):
             sensorR = [body.trackL_center[0]-20, body.trackL_center[1]]
             sensorL = [body.trackR_center[0]+20, body.trackR_center[1]]
 
-            print "measuring distance!"
+            self._log("measuring distance!")
             for l_source in self.light_sources:
                 x, y = l_source.position
                 body.light_distL += get_dist(x, y, *body.creature.local_to_world(sensorL))
@@ -220,7 +222,15 @@ class Environment(object):
             body.creature.position = (body.creature.position[0], self.HEIGHT)
 
 
-        if self.display_sim is True:
+        if self.display_sim:
+            # Check if we shuold freeze simulation
+            for event in pygame.event.get():
+                if event.type == KEYDOWN and event.key == K_f:
+                    self._log("Freezing dispay")
+                    self.frozen = not self.frozen
+
+
+        if self.display_sim and not self.frozen:
             to_display = self._display_stuff()
             self.clock.tick(self.clock_time)
 
@@ -228,7 +238,7 @@ class Environment(object):
 
 class Body(object):
     def __init__(self, environment, engine_force=0.1, sensor_h=80, sensor_a=40,
-                 creature_spawn_loc=None, use_sensor=True):
+                 creature_spawn_loc=None, use_sensor=True, logging=False):
         """
         Class which creates simulation, initializes world and so on.
         :param environment: Environment object on which this creature will live
@@ -248,6 +258,8 @@ class Body(object):
         self.sensor_a = sensor_a
 
         self.use_sensor = use_sensor
+        self._logging = logging
+
         self.creature_spawn_loc = creature_spawn_loc if creature_spawn_loc is not None else [WIDTH/2, HEIGHT/2]
 
         self.SENSOR_COLLTYPE = 1
@@ -276,16 +288,22 @@ class Body(object):
         self.timer = 0
 
 
+    def _log(self, *args):
+        if self._logging:
+            for arg in args:
+                print arg,
+            print ""
+
 
     def _sensor_activated(self, arbiter, space, data):
         self.detected = True
-        print "sensor activated!"
+        self._log("sensor activated!")
         return False  # pymunk should ignore this collision
 
 
     def _sensor_deactivated(self, arbiter, space, data):
         self.detected = False
-        print "sensor deactivated!"
+        self._log("sensor deactivated!")
 
 
     def _pick_up_target(self, arbiter, space, data):
@@ -298,10 +316,10 @@ class Body(object):
         try:
             # Only light sources have the following property
             del self.environment.light_sources[target.lsource_id]
-        except AttributeError:
+        except (AttributeError, IndexError):
             pass
         # TEMP
-        print self.score
+        self._log(self.score)
 
 
         return False #  body will be removed anyway

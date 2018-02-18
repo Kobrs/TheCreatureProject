@@ -7,6 +7,7 @@ This project aims to create environment for creating virtual creatures driven by
 * [Pymunk][pymunk_link]
 * [Ascii_graph][ascii_graph_link]
 * Matplotlib
+* Numpy
 * 
 * [DEAP][deap_link] (optional)
 
@@ -16,6 +17,9 @@ To use this code you should either add TheCreatureProject directory to PYTHONPAT
 echo "export PYTHONPATH=$PYTHONPATH:/path/to/TheCreatureProject" >> ~/.bashrc
 ```
 or put this TheCretureProject code to python site-packages directory, copy and run cases from somewhere else.
+
+## Usage
+The most interesting part is in Cases directory, where code for using specific architectures, parameters, models is used.
 
 
 [neuron_link]: https://neuron.yale.edu/neuron/

@@ -1,0 +1,26 @@
+Testing m=-0.100000 s=0.750000, a=prebuilt, repeat=0
+Testing m=-0.100000 s=0.750000, a=prebuilt, repeat=1
+Testing m=-0.100000 s=0.750000, a=prebuilt, repeat=2
+Testing m=-0.100000 s=0.750000, a=prebuilt, repeat=3
+Testing m=-0.100000 s=0.750000, a=prebuilt, repeat=4
+Testing m=-0.100000 s=0.750000, a=prebuilt, repeat=5
+Testing m=-0.100000 s=0.750000, a=prebuilt, repeat=6
+Scoring: architecture: prebuilt mean = -0.100000, stdev = 0.750000, score = 30.000000
+
+Testing m=-0.100000 s=0.750000, a=prebuilt, repeat=7
+Scoring: architecture: prebuilt mean = -0.100000, stdev = 0.750000, score = 36.000000
+
+Testing m=-0.100000 s=0.750000, a=prebuilt, repeat=8
+Scoring: architecture: prebuilt mean = -0.100000, stdev = 0.750000, score = 32.000000
+
+Testing m=-0.100000 s=0.750000, a=prebuilt, repeat=9
+Scoring: architecture: prebuilt mean = -0.100000, stdev = 0.750000, score = 24.000000
+
+Testing m=-0.100000 s=0.750000, a=prebuilt, repeat=10
+Scoring: architecture: prebuilt mean = -0.100000, stdev = 0.750000, score = 10.000000
+
+Testing m=-0.100000 s=0.750000, a=prebuilt, repeat=11
+Scoring: architecture: prebuilt mean = -0.100000, stdev = 0.750000, score = 19.000000
+
+running_processes: [(-0.10000000000000001, 0.75, 'prebuilt', <subprocess.Popen object at 0x7f101dc477d0>), (-0.10000000000000001, 0.75, 'prebuilt', <subprocess.Popen object at 0x7f101dc47810>), (-0.10000000000000001, 0.75, 'prebuilt', <subprocess.Popen object at 0x7f101dc47850>), (-0.10000000000000001, 0.75, 'prebuilt', <subprocess.Popen object at 0x7f101dc47890>), (-0.10000000000000001, 0.75, 'prebuilt', <subprocess.Popen object at 0x7f101dc478d0>), (-0.10000000000000001, 0.75, 'prebuilt', <subprocess.Popen object at 0x7f101dc47910>)]
+[(-0.10000000000000001, 0.75, 'prebuilt', 30), (-0.10000000000000001, 0.75, 'prebuilt', 36), (-0.10000000000000001, 0.75, 'prebuilt', 32), (-0.10000000000000001, 0.75, 'prebuilt', 24), (-0.10000000000000001, 0.75, 'prebuilt', 10), (-0.10000000000000001, 0.75, 'prebuilt', 19), (-0.10000000000000001, 0.75, 'prebuilt', 9), (-0.10000000000000001, 0.75, 'prebuilt', 27), (-0.10000000000000001, 0.75, 'prebuilt', 38), (-0.10000000000000001, 0.75, 'prebuilt', 32), (-0.10000000000000001, 0.75, 'prebuilt', 26), (-0.10000000000000001, 0.75, 'prebuilt', 33)]

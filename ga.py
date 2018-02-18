@@ -1,7 +1,6 @@
 import numpy as np
 import binstr as b
 from neuron import h, gui
-# from neuron import h
 from matplotlib import pyplot as plt
 import Cells
 try:
@@ -302,7 +301,18 @@ class Specimen(GAinterpreter):
         self.stim_conns.append(clamp)
 
 
-    def add_noise_to_cells(self, cells, mean=0.01, stdev=0.3, dur=1e9, gate_cell=False):
+    def add_noise_to_cells(self, cells, mean=0.01, stdev=0.3, dur=1e9,
+                           gate_cell=False, one_step=False):
+        """
+        Add gaussian noise current to given cells
+        :param cells: list of cells on which noise will be applied
+        :param mean: mean of noise gaussian distribution
+        :param stdev: standard deviation of noise guassian distribution
+        :param dur: duration of noise
+        :param gate_cells: indicate whether we gave index to normal cells or to
+                           gate cells
+        :param one_step: if true make noise disappear after single simulation
+        """
         for cell_id in cells:
             cell = self.cells_dict[cell_id] if not gate_cell else self.gate_cells[cell_id]
             noise = h.InGauss(cell.dend(0.1))
@@ -310,8 +320,13 @@ class Specimen(GAinterpreter):
             noise.stdev = stdev
             noise.dur = dur
 
-            # Add it somewhere so it stays until clear_stim is called
-            self.stim_conns.append(noise)
+            # If one step is true, then add to stim_conns, which will be reset
+            #   after each step
+            if one_step:
+                # Add it somewhere so it stays until clear_stim is called
+                self.stim_conns.append(noise)
+            else:
+                self.conn_list.append(noise)
 
 
 
